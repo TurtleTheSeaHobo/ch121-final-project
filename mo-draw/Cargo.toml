@@ -1,0 +1,23 @@
+[package]
+name = "mo-draw"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["egl", "glx", "x11", "wayland", "wgl"]
+egl = ["glutin/egl"]
+glx = ["glutin/glx", "glutin/x11", "winit/x11", "x11"]
+wgl = ["glutin/wgl"]
+x11 = ["glutin/x11", "winit/x11"]
+wayland = ["glutin/wayland", "winit/wayland", "winit/wayland-dlopen", "winit/wayland-csd-adwaita-notitle"]
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+glutin = { git = "https://github.com/rust-windowing/glutin", default-features = false }
+ndarray = "0.15"
+winit = { version = "0.27", default-features = false }
+raw-window-handle = "0.5"
+
+[build-dependencies]
+gl_generator = "0.14"
+cfg_aliases = "0.1.1"
