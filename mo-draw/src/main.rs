@@ -31,19 +31,18 @@ pub mod mo_coefs;
 use atom::Atom;
 use basis::Basis;
 use drawer::Drawer;
-use mo_coefs::mo_coefs_from_argvs;
 
 #[derive(Parser, Debug)]
 #[command(name = "CH121 Final MO Drawer")]
 #[command(author = "James Moore <jam0152@uah.edu>")]
 #[command(about = "Visualizes molecular electron orbitals", long_about = None)]
 struct Args {
-    #[arg(short = 'B', long = "basis", num_args = 1.., value_terminator = "]")]
+    #[arg(short = 'B', long = "basis")]
     bases: Vec<String>,
-    #[arg(short = 'A', long = "atom", num_args = 1.., value_terminator = "]")]
+    #[arg(short = 'A', long = "atom")]
     atoms: Vec<String>,
-    #[arg(short = 'C', long = "coefs", num_args = 1.., value_terminator = "]]")]
-    coefs: Vec<String>,
+    #[arg(short = 'C', long = "coefs")]
+    coefs: String,
 }
 
 fn collect_argvs(raw_argv: &Vec<String>) -> Vec<Vec<String>> {
@@ -75,18 +74,16 @@ pub struct Params {
 
 impl Params {
     fn from_args(args: Args) -> Self {
-        let basis_argvs = collect_argvs(&args.bases);
-        let bases = basis_argvs.into_iter()
-                               .map(|v| Basis::from_argv(v).unwrap())
-                               .collect();
-
-        let atom_argvs = collect_argvs(&args.atoms);
-        let atoms = atom_argvs.into_iter()
-                              .map(|v| Atom::from_argv(v).unwrap())
+        let bases = args.bases.into_iter()
+                              .map(|s| Basis::from_arg(&s).unwrap())
                               .collect();
 
-        let mo_coefs_argvs = collect_argvs(&args.coefs);
-        let mo_coefs = mo_coefs_from_argvs(&mo_coefs_argvs).unwrap();
+        let atoms = args.atoms.into_iter()
+                              .map(|s| Atom::from_arg(&s).unwrap())
+                              .collect();
+
+        let mo_coefs = mo_coefs::from_arg(&args.coefs)
+                                .unwrap();
 
         Self { bases, atoms, mo_coefs }
     }

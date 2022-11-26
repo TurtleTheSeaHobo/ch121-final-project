@@ -16,7 +16,7 @@ pub struct Basis {
 
 impl Basis {
     // there are so many better ways to do this that I didn't have time for
-    pub fn from_argv(argv: Vec<String>) -> Result<Self, Error> {
+    pub fn from_arg(arg: &str) -> Result<Self, Error> {
         let mut coefs: Vec<Vec<f64>> = Vec::new();
         let mut expns: Vec<Vec<f64>> = Vec::new();
 
@@ -28,7 +28,9 @@ impl Basis {
 
         let mut state = State::None;
 
-        for item in argv {
+        for item in arg.trim_matches('[')
+                       .trim_matches(']')
+                       .split(' ') {
             if &item[..1] == "N" {
                 let n: usize = item[1..].parse()?;
 

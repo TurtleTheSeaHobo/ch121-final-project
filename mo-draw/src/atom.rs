@@ -7,11 +7,13 @@ pub struct Atom {
 }
 
 impl Atom {
-    pub fn from_argv(argv: Vec<String>) -> Result<Self, Error> {
+    pub fn from_arg(arg: &str) -> Result<Self, Error> {
         let mut basis_id = 0;
         let mut position = [0.0; 3];
 
-        for item in argv {
+        for item in arg.trim_matches('[')
+                       .trim_matches(']')
+                       .split(' ') {
             match (&item[..1], &item[1..]) {
                 ("B", rest) => basis_id = rest.parse()?,
                 ("X", rest) => position[0] = rest.parse()?,
