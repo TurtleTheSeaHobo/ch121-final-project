@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse as ap
+import subprocess as sp
 from pyscf import scf, gto
 
 def struct(**kwargs):
@@ -58,6 +59,71 @@ def collect_basis_set(mol):
 
     return basis_set
 
+def run_mo_draw(basis_set, atoms, mo_coefs):
+    def to_b_arg(basis):
+        n = 1
+        s = "["
+
+        for (expns, coefses) in basis:
+            s += "N{n} ".format(n = n)
+
+            for expn in expns:
+                s += "{x} ".format(x = expn)
+
+            l = 0
+
+            for coefs in coefses:
+                s += "L{l} ".format(l = l)
+
+                for coef in coefs:
+                    s += "{x} ".format(x = coef)
+
+                l += 1
+
+            n += 1
+
+        s = s[:-1] + "]"
+
+        return s
+
+    def to_a_arg(atom):
+        (b, pos) = atom
+        s = "[B{b} X{x} Y{y} Z{z}]".format(b = b,
+                                             x = pos[0],
+                                             y = pos[1],
+                                             z = pos[2])
+
+        return s
+
+    def to_c_arg(mo_coefs):
+        s = "["
+
+        for row in mo_coefs:
+            s += "["
+
+            for coef in row:
+                s += "{x} ".format(x = coef)
+
+            s = s[:-1] + "] "
+
+        s = s[:-1] + "]"
+
+        return s
+
+    b_args = [to_b_arg(basis) for basis in basis_set.values()]
+    a_args = [to_a_arg(atom) for atom in atoms]
+    c_arg = to_c_arg(mo_coefs)
+
+    args = ["./mo-draw/mo-draw"]
+
+    for arg in b_args: args += ["-B", arg]
+    for arg in a_args: args += ["-A", arg]
+
+    args += ["-C", c_arg]
+
+    #print(args)
+    sp.run(args)
+
 def main():
     parser = ap.ArgumentParser(prog = "ch121-final",
                                description = "calculate and visualize molecular orbitals.")
@@ -78,13 +144,15 @@ def main():
     mf = scf.hf.SCF(mol)
     mf.scf()
 
-    atoms = collect_atoms(mol)
     basis_set = collect_basis_set(mol)
+    atoms = collect_atoms(mol)
     mo_coefs = mf.mo_coeff
 
-    print(atoms)
-    print(basis_set)
-    print(mo_coefs)
+    #print(basis_set)
+    #print(atoms)
+    #print(mo_coefs)
+
+    run_mo_draw(basis_set, atoms, mo_coefs)
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,13 @@
 use ndarray::{ Array2 };
 use crate::error::Error;
 
-pub fn subshell_index(n: usize, l: usize) -> usize {
-    let offset = [0, 1, 3, 6, 10][n - 1];
+pub fn nl_index(n: i32, l: i32) -> usize {
+    const OFFSETS: [usize; 5] = [0, 1, 3, 6, 10];
+    OFFSETS[n as usize - 1] + l as usize
+}
 
-    offset + l
+pub fn lm_index(l: i32, m: i32) -> usize {
+    (2 * l + m) as usize
 }
 
 #[derive(Debug)]
@@ -22,8 +25,8 @@ impl Basis {
 
         enum State {
             None,
-            PushExpn(usize),
-            PushCoef(usize, usize),
+            PushExpn(i32),
+            PushCoef(i32, i32),
         }
 
         let mut state = State::None;
@@ -32,23 +35,23 @@ impl Basis {
                        .trim_matches(']')
                        .split(' ') {
             if &item[..1] == "N" {
-                let n: usize = item[1..].parse()?;
+                let n: i32 = item[1..].parse()?;
 
                 if n < 1 {
                     return Err("invalid N in basis specfication".into());
-                } else if n > expns.len() {
-                    expns.resize(n, Vec::new());
+                } else if (n as usize) > expns.len() {
+                    expns.resize(n as usize, Vec::new());
                 }
 
                 state = State::PushExpn(n);
             } else if &item[..1] == "L" {
-                let l: usize = item[1..].parse()?;
+                let l: i32 = item[1..].parse()?;
                 let n = match state {
                     State::None => return Err("invalid basis specficiation".into()),
                     State::PushExpn(n) => n,
                     State::PushCoef(n, _l) => n,
                 };
-                let i = subshell_index(n, l);
+                let i = nl_index(n, l);
 
                 if i >= coefs.len() {
                     coefs.resize(i + 1, Vec::new());
@@ -57,12 +60,12 @@ impl Basis {
                 state = State::PushCoef(n, l);
             } else if let State::PushExpn(n) = state {
                 let expn: f64 = item.parse()?;
-                let i = n - 1;
+                let i = (n - 1) as usize;
 
                 expns[i].push(expn);
             } else if let State::PushCoef(n, l) = state {
                 let coef: f64 = item.parse()?;
-                let i = subshell_index(n, l);
+                let i = nl_index(n, l);
 
                 coefs[i].push(coef);
             } else {

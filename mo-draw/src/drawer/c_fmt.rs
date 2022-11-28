@@ -37,20 +37,25 @@ pub fn orbitals(atoms: &Array1<Atom>,
 
     for atom in atoms {
         let basis = &bases[atom.basis_id];
+        let num_expns = basis.expns.shape()[0];
         let pos = format!("{{ {x}, {y}, {z} }}",
                           x = atom.position[0],
                           y = atom.position[1],
                           z = atom.position[2]);
 
-        for n in 1..=basis.expns.len() {
-            let bas_expns = array1(&basis.expns.row(n - 1));
+        for n in 1..=(num_expns as i32) {
+            let bas_expns = array1(&basis.expns.row(n as usize - 1));
 
             for l in 0..n {
-                let nl_idx = basis::subshell_index(n, l);
-                let bas_coefs = array1(&basis.coefs.row(nl_idx));
-                let entry = format!("{{ {pos}, {nl_idx}, {bas_expns}, {bas_coefs} }}");
+                let nl_idx = basis::nl_index(n, l);
 
-                v.push(entry);
+                for m in -l..=l {
+                    let bas_coefs = array1(&basis.coefs.row(nl_idx));
+                    let lm_idx = basis::lm_index(l, m);
+                    let entry = format!("{{ {pos}, {lm_idx}, {bas_expns}, {bas_coefs} }}");
+
+                    v.push(entry);
+                }
             }
         }
     }

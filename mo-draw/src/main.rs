@@ -183,8 +183,6 @@ fn main() {
     let args = Args::parse();
     let params = Params::from_args(args);
 
-    println!("{:?}", params);
-
     let event_loop = EventLoop::new();
     let raw_display = event_loop.raw_display_handle();
     let window = WindowBuilder::new()
@@ -223,7 +221,7 @@ fn main() {
                 _ => (),
             },
             Event::RedrawEventsCleared => {
-                drawer.draw_mo(0);
+                drawer.draw_mo(5);
                 window.request_redraw();
 
                 gl_surface.swap_buffers(&gl_context)
