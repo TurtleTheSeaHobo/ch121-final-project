@@ -23,14 +23,18 @@ use glutin::{
 
 pub mod atom;
 pub mod basis;
+pub mod controller;
 pub mod drawer;
 pub mod error;
+pub mod event;
 pub mod gl;
 pub mod mo_coefs;
 
 use atom::Atom;
 use basis::Basis;
 use drawer::Drawer;
+use controller::Controller;
+use event::{ Frame, HandleEvent };
 
 #[derive(Parser, Debug)]
 #[command(name = "CH121 Final MO Drawer")]
@@ -178,7 +182,6 @@ fn create_gl_surface(gl_display:    &Display,
                        .unwrap() }
 }
 
-
 fn main() {
     let args = Args::parse();
     let params = Params::from_args(args);
@@ -197,10 +200,15 @@ fn main() {
     let gl_context = gl_context.make_current(&gl_surface)
                                .unwrap();
 
+    let mut frame = Frame::initial();
+    let mut controller = Controller::new();
     let drawer = Drawer::new(&gl_display, &params);
 
     event_loop.run(move |evt, _, ctl_flow| {
         *ctl_flow = ControlFlow::Wait;
+
+        frame.next();
+        controller.handle_event(&frame, &evt);
 
         match evt {
             Event::WindowEvent { event, .. } => match event {
@@ -221,7 +229,7 @@ fn main() {
                 _ => (),
             },
             Event::RedrawEventsCleared => {
-                drawer.draw_mo(5);
+                drawer.draw_mo(controller.vars.mo_idx);
                 window.request_redraw();
 
                 gl_surface.swap_buffers(&gl_context)

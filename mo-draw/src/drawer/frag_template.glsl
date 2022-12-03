@@ -75,7 +75,7 @@ float lcao_wave_fn(vec3 pos) {
 }
 
 float ray_integral(vec3 ro, vec3 rd) {
-    float rm = 0.0;
+    float rm = 5.0;
     float q = 0.0;
     float wa = lcao_wave_fn(ro);
     float wb = 0.0;
@@ -95,7 +95,7 @@ float ray_integral(vec3 ro, vec3 rd) {
 
 void main() {
     vec2 uv = (gl_FragCoord.xy - 0.5 * resolution) / resolution.y;
-    vec3 ro = vec3(0.0, 0.0, -5.0);
+    vec3 ro = vec3(0.0, 0.0, -10.0);
     vec3 rd = normalize(vec3(uv, 1.0));
     float q = ray_integral(ro, rd);
 

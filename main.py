@@ -121,6 +121,7 @@ def run_mo_draw(basis_set, atoms, mo_coefs):
 
     args += ["-C", c_arg]
 
+    print("Num mo coefs: {x}".format( x = len(mo_coefs[1])))
     #print(args)
     sp.run(args)
 
@@ -151,6 +152,8 @@ def main():
     #print(basis_set)
     #print(atoms)
     #print(mo_coefs)
+    print("MO (occ, energy):")
+    print(list(zip(mf.mo_energy, mf.mo_occ)))
 
     run_mo_draw(basis_set, atoms, mo_coefs)
 

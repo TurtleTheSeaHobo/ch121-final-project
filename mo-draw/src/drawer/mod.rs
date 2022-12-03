@@ -8,7 +8,6 @@ use crate::{
     Params
 };
 use glutin::display::{ Display, GlDisplay };
-use nalgebra::{ Rotation3, Translation3 };
 
 mod c_fmt;
 
